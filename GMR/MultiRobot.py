@@ -1,5 +1,5 @@
 from matplotlib import pyplot as plt
-from .GraphEditor import SimpleGraph
+from .Graph import SimpleGraph
 
 class MultiRobot():
     def __init__(self, graph, graph_type='undirected', indexBase='1-index'):

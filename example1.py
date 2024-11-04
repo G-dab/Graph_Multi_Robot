@@ -1,3 +1,6 @@
+'''
+example1 依据图创建多机器人系统
+'''
 from GMR import MultiRobot
 
 # 创建无向图
@@ -26,13 +29,8 @@ print('Degree Matrix: ', MRobot.Graph.degreematrix)
 # 拉普拉斯矩阵
 print('Laplacian Matrix: ', MRobot.Graph.lapmatrix)
 
-# ----- 仿真 -----
-# 仿真参数
-config = {
-    'time': 800,
-    'time_step': 0.01,
-    'mode': 'limear controller',
-    'controller': -MRobot.Graph.lapmatrix,
-    'initial_state': [-10, 5, 0, 5, 10],
-}
-MRobot.simulation(config)
+# ----- 显示图 -----
+MRobot.Graph.show()
+
+# ----- 典型图论算法 -----
+

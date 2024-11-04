@@ -12,14 +12,22 @@ class GraphBase():
         # show graph
         pass
 
+# 统一使用 0-index
 class SimpleGraph(GraphBase):
     def __init__(self, graph, graph_type='undirected', indexBase='0-index', plot_xlim=[-10, 10], plot_ylim=[-10, 10]):
         super().__init__(plot_xlim, plot_ylim)
 
         if graph_type not in ['undirected', 'directed']:
             raise ValueError('Graph type not supported!')
+        
         self.graph = graph
         self.graph_type = graph_type
+        self.node_size = graph['node_size']
+        if indexBase == '0-index':
+            self.edges = graph['edges']
+        elif indexBase == '1-index':
+            self.edges = [[edge[0]-1, edge[1]-1] for edge in graph['edges']]
+
         self.adjmatrix = self.__return_adjmatrix(graph, indexBase)
         self.incmatrix = self.__return_incmatrix(graph, indexBase)
         self.degreematrix = np.diag(np.sum(self.adjmatrix, axis=1))
@@ -73,28 +81,30 @@ class SimpleGraph(GraphBase):
       
         return incmatrix
 
-    def show(self, show_node_id=True, show_node_label=False, show_edge_label=True, node_size=300, edge_width=2):
+    def show(self, show_node_id=True, node_size=300, edge_width=2):
+        fig, ax = plt.subplots()
         # 随机生成节点位置
-        node_positions = {}
-        for node_id in self.nodes:
+        node_positions = [None] * self.node_size
+        for node_id in range(self.node_size):
             node_positions[node_id] = (self.plot_xlim[0] + 0.8 * (self.plot_xlim[1] - self.plot_xlim[0]) * np.random.rand(),
                                        self.plot_ylim[0] + 0.8 * (self.plot_ylim[1] - self.plot_ylim[0]) * np.random.rand())
 
         # 绘制节点
-        for node_id, pos in node_positions.items():
-            self.ax.scatter(pos[0], pos[1], s=node_size, facecolors='white', edgecolors='black')
+        for node_id in range(self.node_size):
+            ax.scatter(node_positions[node_id][0], node_positions[node_id][1],
+                       zorder=2,
+                       s=node_size, linewidths=edge_width, edgecolors='black', marker='o')
             if show_node_id:
-                self.ax.text(pos[0], pos[1], str(node_id), ha='center', va='center', fontsize=node_size / 30)
-            if show_node_label:
-                self.ax.text(pos[0], pos[1], str(self.nodes[node_id]), ha='center', va='center', fontsize=node_size / 30)
-
+                ax.text(node_positions[node_id][0], node_positions[node_id][1], str(node_id),
+                        zorder=3,
+                        ha='center', va='center', fontsize=12)
+        
         # 绘制边
         for edge in self.edges:
-            source_id, target_id = edge
-            source_pos = node_positions[source_id]
-            target_pos = node_positions[target_id]
-
-            # 计算控制点，使边有点弯曲
-            control_point_x = (source_pos[0] + target_pos[0]) / 2 + (target_pos[0] - source_pos[0]) * 0.1
-            control_point_y = (source_pos[1] + target_pos[1]) / 2 + (target_pos[1] - source_pos[1]) * 0.1
-
+            start_pos = node_positions[edge[0]]
+            end_pos = node_positions[edge[1]]
+            ax.plot([start_pos[0], end_pos[0]], [start_pos[1], end_pos[1]], 
+                    zorder=1,
+                    color='black', linewidth=edge_width)
+        
+        plt.show()
